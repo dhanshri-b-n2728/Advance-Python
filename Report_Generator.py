@@ -1,0 +1,92 @@
+# Advanced Report Generator using Decorators, Class Methods, and Magic Methods
+
+def format_decorator(format_func):
+    """Decorator to apply formatting to report sections."""
+    def wrapper(self, content):
+        formatted = format_func(self, content)
+        self.sections.append(formatted)
+        return formatted
+    return wrapper
+
+
+class Report:
+    reports_created = 0   # Class variable to track number of reports
+
+    def __init__(self, title):
+        self.title = title
+        self.sections = []
+        Report.reports_created += 1
+
+    # Magic method for string representation
+    def __str__(self):
+        return f"Report: {self.title}\n" + "\n".join(self.sections)
+
+    # Magic method for length (number of sections)
+    def __len__(self):
+        return len(self.sections)
+
+    # Class method to show total reports created
+    @classmethod
+    def total_reports(cls):
+        return f"Total reports created: {cls.reports_created}"
+
+    # Decorated methods for formatting
+    @format_decorator
+    def add_heading(self, content):
+        return f"=== {content.upper()} ==="
+
+    @format_decorator
+    def add_paragraph(self, content):
+        return f"{content}"
+
+    @format_decorator
+    def add_bullet_points(self, content_list):
+        return "\n".join([f"- {item}" for item in content_list])
+
+
+# User Interface
+def main():
+    print("Welcome to Dynamic Report Generator!")
+    title = input("Enter report title: ")
+    report = Report(title)
+
+    while True:
+        print("\n--- Report Menu ---")
+        print("1. Add Heading")
+        print("2. Add Paragraph")
+        print("3. Add Bullet Points")
+        print("4. Show Report")
+        print("5. Show Total Reports Created")
+        print("6. Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            heading = input("Enter heading text: ")
+            report.add_heading(heading)
+
+        elif choice == "2":
+            paragraph = input("Enter paragraph text: ")
+            report.add_paragraph(paragraph)
+
+        elif choice == "3":
+            items = input("Enter bullet points (comma separated): ").split(",")
+            report.add_bullet_points([item.strip() for item in items])
+
+        elif choice == "4":
+            print("\n" + str(report))  # Uses __str__ magic method
+            print(f"Sections count: {len(report)}")  # Uses __len__ magic method
+
+        elif choice == "5":
+            print(Report.total_reports())  # Class method
+
+        elif choice == "6":
+            print("Exiting Report Generator. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
+
+
+if __name__ == "__main__":
+    main()
